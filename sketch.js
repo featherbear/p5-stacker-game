@@ -94,7 +94,12 @@ class Grid {
   }
 
   place () {
-    const [x1, x2, l1, l2] = [this.lastLevel.x, this.secondLastLevel.x, this.lastLevel.length, this.secondLastLevel.length]
+    const [x1, x2, l1, l2] = [
+      this.lastLevel.x,
+      this.secondLastLevel.x,
+      this.lastLevel.length,
+      this.secondLastLevel.length
+    ]
 
     const lowerBound = Math.max(x1, x2)
     const upperBound = Math.min(x1 + l1, x2 + l2)
@@ -109,7 +114,7 @@ class Grid {
     this.lastLevel.isRight = this.secondLastLevel.isRight
     this.lastLevel.x = this.secondLastLevel.x
 
-    if (length <= 0) {
+    if (length <= 0 || this.levels.length > this.columns) {
       gamePlaying = false
       clearInterval(t)
     }
