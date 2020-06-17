@@ -21,7 +21,7 @@ class Level {
 
   step () {
     if (this.isRight) {
-      if ((this.x + 1 + this.length) > this.xLimit) {
+      if (this.x + 1 + this.length > this.xLimit) {
         this.isRight = false
         this.x--
       } else {
@@ -36,8 +36,6 @@ class Level {
       }
     }
   }
-
-  place () {}
 }
 
 class Grid {
@@ -51,7 +49,6 @@ class Grid {
     this.rowHeight = height / columns
 
     this.maxLevelLength = Math.floor(rows / 2)
-    console.log(this.maxLevelLength)
 
     this.levels = [
       (this.lastLevel = new Level(
@@ -78,34 +75,68 @@ class Grid {
     this.levels.forEach(level => level.draw())
   }
 
-  add () {
+  add (length) {
+    this.secondLastLevel = this.lastLevel
     this.levels.push(
-      this.lastLevel = new Level(
-        this.lastLevel.length,
+      (this.lastLevel = new Level(
+        length,
         0,
         this.rows,
         this.height - (this.levels.length + 1) * this.rowHeight,
         this.columnWidth,
         this.rowHeight
-      )
+      ))
     )
   }
 
   step () {
-    console.log(this.lastLevel)
     this.lastLevel.step()
+  }
+
+  place () {
+    const [x1, x2, l1, l2] = [this.lastLevel.x, this.secondLastLevel.x, this.lastLevel.length, this.secondLastLevel.length]
+
+    const lowerBound = Math.max(x1, x2)
+    const upperBound = Math.min(x1 + l1, x2 + l2)
+
+    const length = upperBound - lowerBound
+
+    if (length > 0) {
+      this.lastLevel.x = lowerBound
+      this.lastLevel.length = length
+    }
+    this.add(length)
+    this.lastLevel.isRight = this.secondLastLevel.isRight
+    this.lastLevel.x = this.secondLastLevel.x
+
+    if (length <= 0) {
+      gamePlaying = false
+      clearInterval(t)
+    }
   }
 }
 
-let g
+let g, t, gamePlaying
+
 function setup () {
   createCanvas(400, 400)
   g = new Grid(400, 400, 7, 10)
-  g.add()
-  setInterval(g.step.bind(g), 150)
+  g.add(g.maxLevelLength)
+  gamePlaying = true
+  t = setInterval(g.step.bind(g), 100)
 }
 
 function draw () {
   background(220)
   g.draw()
+}
+
+function keyPressed () {
+  if (keyCode == 0x20 /* SPACE */) {
+    if (gamePlaying) {
+      g.place()
+    } else {
+      setup()
+    }
+  }
 }
