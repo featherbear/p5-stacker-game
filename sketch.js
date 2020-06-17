@@ -8,9 +8,13 @@ class Level {
     this.cellHeight = cellHeight
 
     this.isRight = true
+
+    this.colour = null
   }
 
   draw () {
+    fill(this.colour || 'white')
+
     rect(
       this.x * this.cellWidth,
       this.yPos,
@@ -76,17 +80,19 @@ class Grid {
   }
 
   add (length) {
-    this.secondLastLevel = this.lastLevel
-    this.levels.push(
-      (this.lastLevel = new Level(
-        length,
-        0,
-        this.rows,
-        this.height - (this.levels.length + 1) * this.rowHeight,
-        this.columnWidth,
-        this.rowHeight
-      ))
+    const newLevel = new Level(
+      length,
+      this.lastLevel.x,
+      this.rows,
+      this.height - (this.levels.length + 1) * this.rowHeight,
+      this.columnWidth,
+      this.rowHeight
     )
+    newLevel.isRight = this.lastLevel.isRight
+
+    this.secondLastLevel = this.lastLevel
+
+    this.levels.push((this.lastLevel = newLevel))
   }
 
   step () {
@@ -109,12 +115,15 @@ class Grid {
     if (length > 0) {
       this.lastLevel.x = lowerBound
       this.lastLevel.length = length
-    }
-    this.add(length)
-    this.lastLevel.isRight = this.secondLastLevel.isRight
-    this.lastLevel.x = this.secondLastLevel.x
 
-    if (length <= 0 || this.levels.length > this.columns) {
+      this.add(length)
+      if (this.levels.length > this.columns) {
+        this.secondLastLevel.colour = 'green'
+        gamePlaying = false
+        clearInterval(t)
+      }
+    } else {
+      this.lastLevel.colour = 'red'
       gamePlaying = false
       clearInterval(t)
     }
